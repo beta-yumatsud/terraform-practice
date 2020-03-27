@@ -272,6 +272,41 @@ module "ec2_instance" {
 }
 ```
 
+## 「第24章 リファクタリング」のmemo
+* 何もしない特殊なリソースとして `null_resource` というのがあるんだってさ
+* state系操作コマンド
+```
+$ terraform state list // 定義しているリソース一覧
+$ terraform state show // 指定したリソースの詳細
+$ terraform state pull // tfstateファイルを標準出力
+$ terraform state push // tfstateファイルを上書き
+$ terraform state rm   // tfstateファイルからリソースを削除
+$ terraform state mv   // 指定したリソース名(moduleを含む)を変更
+```
+→ いずれもあまり使うべきものではないが、やむなしの場合は上記を参考にstateファイルを操作すること
+
+## 「第25章 既存リソースのインポート」のメモ
+* Terraform管理下にないリソースをインポートして使う方法
+* `terraform import` コマンドを使うと、Terraform管理外のリソースをtfstateファイル取り込み可能
+* `terraformer` や `terraforming` などのツールを使うと既存のリソースから自動でtfファイルを作成してくれたりする
+
+## 「第28章 落ち穂拾い」のメモ
+* 高速化のための並列化オプションが存在するみたい
+```shell script
+$ terraform plan -parallelism=20
+
+$ export TF_CLI_ARGS_plan="-parallelism=20"
+$ export TF_CLI_ARGS_apply="-parallelism=20"
+$ export TF_CLI_ARGS_destory="-parallelism=20"
+```
+* デバッグログは下記の環境変数を使ってやると良い
+```shell script
+$ TF_LOG=debug terraform apply
+
+$ TF_LOG=debug TF_LOG_PATH=/tmp/terraform.log terraform apply
+```
+* JSONにコメントを入れたいときなどは、 `jsonencode(yamldecode(file("./cd.yaml")))` とかでyamlファイルからjsonに変更可能なので、yamlでコメントを入れておく
+
 ## その他
 * `tfstate` ファイルは `Terraform Cloud` を使うことも可能
 * module分割はちゃんとしようぜ
@@ -282,6 +317,7 @@ module "ec2_instance" {
   * 影響範囲（ユーザに影響が出るものと、CI/CDのようにそこまで影響が出ない: これはサービスによりそうだけどものと分ける的な）
   * 組織のライフサイクル（IAMユーザなど）
   * 要は関心ごとの分離をしませう
+* terraformのCIとかで `tfnotify` というGithubとの連携しやすいツールがあるみたい
 
 # 参考
 * [公式ドキュメント](https://www.terraform.io/docs/index.html)
